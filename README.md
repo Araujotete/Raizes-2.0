@@ -1,4 +1,4 @@
-# Raizes 2.0
+# Raízes 2.0
 
 ### Jogo sobre empreendedorismo negro, criado para trabalho escolar. 
 
