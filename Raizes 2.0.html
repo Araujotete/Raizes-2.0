@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo de Empreendedorismo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+            animation: slideIn 0.3s ease-in;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .input-group {
+            margin: 20px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .character-option {
+            padding: 10px;
+            border: 3px solid #ddd;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f9f9f9;
+        }
+
+        .character-option img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .modal-view-image {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-view-image.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-image-content {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            animation: slideIn 0.3s;
+            position: relative;
+        }
+
+        .modal-image-content img {
+            width: 100%;
+            max-height: 600px;
+            object-fit: contain;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .modal-image-content h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 2em;
+            font-weight: bold;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: #333;
+        }
+
+        .character-option:hover,
+        .character-option.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateY(-5px);
+        }
+
+        .character-option.selected {
+            border-color: #667eea;
+            background: #667eea;
+        }
+
+        .character-option.selected .character-name {
+            color: white;
+            font-weight: bold;
+        }
+
+        .character-name {
+            color: #333;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .mentor-card {
+            background: #f9f9f9;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .mentor-card:hover {
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+
+        .mentor-image {
+            width: 120px;
+            height: 120px;
+            min-width: 120px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .mentor-content {
+            flex: 1;
+        }
+
+        .mentor-content strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .mentor-card.visited {
+            opacity: 0.6;
+        }
+
+        .mentor-card.visited::after {
+            content: '✓ Visitado';
+            background: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            margin-left: auto;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .option-btn {
+            padding: 15px 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: #f9f9f9;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+
+        .option-btn.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .checkbox-group {
+            display: grid;
+            gap: 12px;
+            margin: 15px 0;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .checkbox-item:hover {
+            background: #f0f4ff;
+            border-color: #667eea;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .business-emoji {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .phase-info {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .phase-info strong {
+            color: #667eea;
+        }
+
+        .score-display {
+            background: #667eea;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .score-display h2 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .score-display p {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .final-message {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .final-message h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .dialogue {
+            background: #f0f4ff;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .dialogue-image {
+            width: 80px;
+            height: 80px;
+            min-width: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .dialogue-text {
+            flex: 1;
+        }
+
+        .dialogue-text strong {
+            color: #667eea;
+            font-style: normal;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #ddd;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+        }
+
+        .phase-counter {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .final-characters {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .final-character-img {
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .ayo-malik {
+            width: 150px;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .player-character {
+            width: 100px;
+            height: 120px;
+            object-fit: cover;
+        }
+
+        .final-characters.dishonest .player-character {
+            width: 60px;
+            height: 70px;
+            align-self: flex-start;
+            margin-top: 30px;
+        }
+
+        .video-container {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .video-container iframe {
+            border-radius: 12px;
+            max-width: 560px;
+            width: 100%;
+        }
+
+        #continueAfterVideo {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .mentorsSelected {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f0f4ff;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- TELA INICIAL -->
+        <div id="screen-inicial" class="screen active">
+            <h2>Bem-vindo ao Jogo de Empreendedorismo</h2>
+            <p style="color: #666; margin: 20px 0;">Escolha seu nome e personagem para começar sua jornada!</p>
+            
+            <div class="input-group">
+                <label for="playerName">Seu Nome:</label>
+                <input type="text" id="playerName" placeholder="Digite seu nome">
+            </div>
+
+            <div class="input-group">
+                <label>Escolha seu Personagem:</label>
+                <div class="character-grid" id="characterGrid"></div>
+            </div>
+
+            <div class="buttons">
+                <button class="btn-primary" onclick="startGame()">Iniciar Jogo</button>
+            </div>
+        </div>
+
+        <!-- ABERTURA DO JOGO -->
+        <div id="screen-abertura" class="screen">
+            <div class="phase-info">
+                <strong>Abertura</strong> - Receba sua missão
+            </div>
+            
+            <div style="display: flex; justify-content: center; gap: 20px; margin: 30px 0;">
+                <div style="text-align: center;">
+                    <img src="https://raw.githubusercontent.com/Araujotete/Raizes2/main/Ay%C3%B4%20antes.png" alt="Ayô" style="width: 150px; height: 180px; object-fit: cover; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);">
+                    <p style="margin-top: 10px; font-weight: bold; color: #667eea;">Ayô</p>
+                </div>
+                <div style="text-align: center;">
+                    <img src="https://raw.githubusercontent.com/Araujotete/Raizes2/main/Malik%20antes.png" alt="Malik" style="width: 150px; height: 180px; object-fit: cover; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);">
+                    <p style="margin-top: 10px; font-weight: bold; color: #667eea;">Malik</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <p style="font-size: 1.2em; color: #333; margin-bottom: 20px;">Chris Gardner aparece na tela e fala:</p>
+                <div class="dialogue">
+                    <img src="https://raw.githubusercontent.com/Araujotete/Raizes-2.0---mentores/main/Chris%20Gardner.png" class="dialogue-image" alt="Chris Gardner">
+                    <div class="dialogue-text">
+                        <strong>Chris Gardner:</strong> "Você foi escolhido(a) para uma missão especial. Você deve ajudar Ayô e Malik a criar seu próprio negócio seguro. Aqui está o mapa deixado pela avó deles. Você deve segui-lo e encontrar seu caminho. Vamos lá?"
+                    </div>
+                </div>
+                <p style="color: #667eea; font-weight: bold; margin-top: 20px;">✓ Primeiro Elemento Coletado: O MAPA</p>
+            </div>
+            <div class="buttons">
+                <button class="btn-primary" onclick="goToPhase(1)">Começar Jornada</button>
+            </div>
+        </div>
+
+        <!-- FASE 1 -->
+        <div id="screen-fase1" class="screen">
+            <div class="phase-counter">Fase 1 de 10</div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 10%;"></div></div>
+            <div class="phase-info"><strong>Fase 1: A Feira de Negócios</strong> - Conheça os mentores (mínimo 3, máximo 5)</div>
+            <p style="color: #666; margin: 20px 0;">Você chegou em uma Feira de Negócios! Clique em cada empreendedor para ouvir suas histórias.</p>
+            <div id="mentorsContainer"></div>
+            <div id="mentorsSelected" class="mentorsSelected" style="display: none;">
+                <strong>Mentores visitados: <span id="mentorCount">0</span>/5</strong>
+            </div>
+            <div class="buttons">
+                <button class="btn-primary" onclick="validatePhase1()" id="btnPhase2" disabled>Continuar para Fase 2</button>
+            </div>
+        </div>
+
+        <!-- FASE 2 -->
+        <div id="screen-fase2" class="screen">
+            <div class="phase-counter">Fase 2 de 10</div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 20%;"></div></div>
+            <div class="phase-info"><strong>Fase 2: Escolha do Negócio</strong> - Escolha de 1 a 3 ramos</div>
+            <div class="input-group">
+                <label>Escolha seus ramos de negócio (mínimo 1, máximo 3):</label>
+                <div class="checkbox-group" id="businessTypes"></div>
+            </div>
+            <div class="input-group">
+                <label for="businessName">Nome do seu empreendimento:</label>
+                <input type="text" id="businessName" placeholder="Ex: Tech Inovadora">
+            </div>
+            <div class="buttons">
+                <button class="btn-primary" onclick="validatePhase2()">Continuar para Fase 3</button>
+            </div>
+        </div>
+
+        <!-- FASE 3 -->
+        <div id="screen-fase3" class="screen">
+            <div class="phase-counter">Fase 3 de 10</div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 30%;"></div></div>
+            <div class="phase-info"><strong>Fase 3: Estratégia de Comunicação</strong> - Crie uma apresentação e escolha canais</div>
+            <div class="input-group">
+                <label for="businessDesc">Descreva seu negócio (máximo 150 caracteres):</label>
+                <textarea id="businessDesc" placeholder="Descreva seu negócio..." maxlength="150" rows="3"></textarea>
+                <small id="charCount" style="color: #999;">0/150</small>
+            </div>
+            <div class="input-group">
+                <label>Escolha seus canais de divulgação (1 a 3):</label>
+                <div class="checkbox-group" id="channels"></div>
+            </div>
+            <div class="buttons">
+                <button class="btn-primary" onclick="validatePhase3()">Continuar para Fase 4</button>
+            </div>
+        </div>
+
+        <!-- FASE 4 -->
+        <div id="screen-fase4" class="screen">
+            <div class="phase-counter">Fase 4 de 10</div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 40%;"></div></div>
+            <div class="phase-info"><strong>Fase 4: Contratação do Primeiro Funcionário</strong></div>
+            <div class="dialogue">
+                <img src="https://raw.githubusercontent.com/Araujotete/Raizes-2.0---mentores/main/Jessica%20Pearson.png" class="dialogue-image" alt="Jessica Pearson">
+                <div class="dialogue-text">
+                    <strong>Jessica Pearson:</strong> "Olá! Eu estou aqui para lhe ajudar a contratar um funcionário. Conheci sua avó, ela era uma pessoa muito determinada. Cuidarei da parte burocrática para você. Quem você vai contratar?"
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Escolha um funcionário:</label>
+                <div class="options-grid" id="employeeOptions"></div>
+            </div>
+            <div class="buttons">
+                <button class="btn-primary" onclick="validatePhase4()">Continuar para Fase 5</button>
+            </div>
+        </div>
+
+        <!-- FASE 5 -->
+        <div id="screen-fase5" class="screen">
+            <div class="phase-counter">Fase 5 de 10</div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 50%;"></div></div>
+            <div class="phase-info"><strong>Fase 5: Primeiro Cliente</strong></div>
+            
+            <div class="dialogue">
+                <img src="https://raw.githubusercontent.com/Araujotete/Raizes2/main/Cliente.png" class="dialogue-image" alt="Cliente">
+                <div class="dialogue-text">
+                    <strong>Cliente:</strong> "Olá, gostaria de comprar seu produto / contratar seu serviço"
+                </div>
+            </div>
+
+            <div class="dialogue">
+                <img id="playerImagePhase5a" src="" class="dialogue-image" alt="Você">
+                <div class="dialogue-text">
+                    <strong>Você:</strong> "Claro. Em que posso ajudar?"
+                </div>
+            </div>
+
+            <div class="dialogue">
+                <img src="https://raw.githubusercontent.com/Araujotete/Raizes2/main/Cliente.png" class="dialogue-image" alt="Cliente">
+                <div class="dialogue-text">
+                    <strong>Cliente:</strong> "Me fale sobre seu produto / serviço"
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="clientPitch">Sua resposta (pitch do produto):</label>
+                <textarea id="clientPitch" placeholder="Descreva seu produto/serviço ao cliente..." rows="3"></textarea>
+            </div>
+
+            <div class="buttons">
+                <button class="btn-primary" onclick="validatePhase5()">Negócio Fechado! Continuar para Fase 6</button>
+            </div>
+        </div>
+
+        <!-- FASE 6 -->
+        <div id="screen-fase6" class="screen">
+            <div class="phase-counter">Fase 6 de 10</div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 60%;"></div></div>
+            <div class="phase-info"><strong>Fase 6: Crescimento e Expansão</strong> - Escolha 1 a 2 estratégias</div>
+            <p style="color: #666; margin: 15px 0;">Seu negócio está crescendo! Escolha como quer se expandir:</p>
+            <div class="checkbox-group" id="growthOptions"></div>
+            <div class="buttons">
+                <button class="btn-primary" onclick="validatePhase6()">Continuar para Fase 7</button>
+            </div>
+        </div>
+
+        <!-- FASE 7 -->
+        <div id="screen-fase7" class="screen">
+            <div class="phase-counter">Fase 7 de 10</div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 70%;"></div></div>
+            <div class="phase-info"><strong>Fase 7: Conflito entre Sócios</strong></div>
+            <p style="color: #666; margin: 15px 0;">Momento crítico! A empresa está crescendo e você agora tem dois sócios: Ayô e Malik. Todos querem ser o sócio gerente, mas só um pode ser.</p>
+            <p style="color: #667eea; font-weight: bold; margin: 15px 0;">Cada sócio comum ganhará 30%, enquanto o sócio gerente ganhará 40%.</p>
+            <p style="color: #666; margin: 15px 0;">O que você fará para mediar esse conflito?</p>
+            <div class="options-grid" id="partnershipOptions"></div>
+            <div class="buttons">
+                <button class="btn-primary" onclick="validatePhase7()">Continuar para Fase 8</button>
+            </div>
+        </div>
+
+        <!-- FASE 8 -->
+        <div id="screen-fase8" class="screen">
+            <div class="phase-counter">Fase 8 de 10</div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 80%;"></div></div>
+            <div class="phase-info"><strong>Fase 8: Crise Legal</strong></div>
+            <p style="color: #666; margin: 15px 0;">Uma empresa mais antiga que a sua descobriu que você está usando uma estratégia similar à dela. Ela processou você por plágio! É hora de agir.</p>
+
+            <div class="dialogue">
+                <img src="https://raw.githubusercontent.com/Araujotete/Raizes-2.0---mentores/main/Jessica%20Pearson.png" class="dialogue-image" alt="Jessica Pearson">
+                <div class="dialogue-text">
+                    <strong>Jessica Pearson:</strong> "Olá! Em que posso ajudar?"
+                </div>
+            </div>
+
+            <div class="dialogue">
+                <img id="playerImagePhase8a" src="" class="dialogue-image" alt="Você">
+                <div class="dialogue-text">
+                    <strong>Você:</strong> "Uma empresa copiou nosso produto, mas estão nos processando por plágio."
+                </div>
+            </div>
+
+            <div class="dialogue">
+                <img src="https://raw.githubusercontent.com/Araujotete/Raizes-2.0---mentores/main/Jessica%20Pearson.png" class="dialogue-image" alt="Jessica Pearson">
+                <div class="dialogue-text">
+                    <strong>Jessica Pearson:</strong> "Que delinquentes! Vamos ganhar essa causa. Me mande os documentos sobre sua empresa e seu produto."
+                </div>
+            </div>
+
+            <div class="dialogue">
+                <img id="playerImagePhase8b" src="" class="dialogue-image" alt="Você">
+                <div class="dialogue-text">
+                    <strong>Você:</strong> "Ok. Enviarei até o fim do dia."
+                </div>
+            </div>
+
+            <p style="color: #28a745; font-weight: bold; margin: 20px 0; text-align: center;">✓ Parabéns! Você ganhou a ação judicial!</p>
+            <p style="color: #666; margin: 15px 0;">A empresa foi condenada a indenizá-lo em R$100 mil. Após Jessica receber sua comissão de 10%, restam R$90 mil para ser dividido entre os sócios.</p>
+
+            <div class="buttons">
+                <button class="btn-primary" onclick="goToPhase(9)">Continuar para Fase 9</button>
+            </div>
+        </div>
+
+        <!-- FASE 9 -->
+        <div id="screen-fase9" class="screen">
+            <div class="phase-counter">Fase 9 de 10</div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 90%;"></div></div>
+            <div class="phase-info"><strong>Fase 9: O Grande Teste Ético</strong></div>
+            <p style="color: #666; margin: 15px 0;">Sua empresa ganhou a causa na justiça e recebeu R$100 mil em indenização. Após pagar os 10% da advogada Jessica, restam R$90 mil. O dinheiro está sobre sua responsabilidade e seus sócios Ayô e Malik ainda não sabem o valor exato recebido.</p>
+            <p style="color: #d32f2f; font-weight: bold; margin: 15px 0;">O que você fará?</p>
+            <div class="options-grid" id="ethicsOptions"></div>
+            <div class="buttons">
+                <button class="btn-primary" onclick="validatePhase9()">Continuar para Fase 10</button>
+            </div>
+        </div>
+
+        <!-- FASE 10 - FINAL HONESTO -->
+        <div id="screen-fase10-honesto" class="screen">
+            <div class="phase-counter">Fase 10 de 10</div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 100%;"></div></div>
+            <div class="phase-info"><strong>Fase 10: Julgamento Final - Caminho da Honestidade</strong></div>
+
+            <div class="final-message">
+                <h2>Parabéns!</h2>
+                <p style="font-size: 1.1em; margin: 20px 0;">Você completou sua jornada empreendedora com sucesso, ética e integridade!</p>
+            </div>
+
+            <p style="color: #666; margin: 15px 0; text-align: center;">Ayô, Malik e você construíram um empreendimento seguro juntos. Os três aparecem lado a lado, celebrando o sucesso compartilhado.</p>
+
+            <div class="final-characters" id="finalCharactersHonesto"></div>
+
+            <div class="input-group">
+                <label style="color: #333; font-weight: bold;">O que você diria da sua jornada empreendedora?</label>
+                <div class="options-grid" id="finalOptions"></div>
+            </div>
+
+            <div class="score-display">
+                <h2>Sua Pontuação Final</h2>
+                <p id="finalScore">950 pontos</p>
+            </div>
+
+            <div class="buttons">
+                <button class="btn-primary" onclick="location.reload()">Jogar Novamente</button>
+            </div>
+        </div>
+
+        <!-- FASE 10 - FINAL DESONESTO -->
+         <div id="screen-fase10-desonesto" class="screen">
+            <div class="phase-counter">Fase 10 de 10</div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 100%;"></div>
+            </div>
+            <div class="phase-info">
+                <strong>Fase 10: Julgamento Final - Consequências da Desonestidade</strong>
+            </div>
+            
+        <!-- VÍDEO DO CARRO DE POLÍCIA -->
+            <div style="text-align: center; margin: 20px 0;">
+                <iframe 
+                    width="100%" 
+                    height="315" 
+                    src="https://www.youtube.com/embed/j-D0ZJj1b8c" 
+                    style="border-radius: 12px; max-width: 560px;"
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+
+            <div class="final-message" style="background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);">
+                <h2>⚠️ Você Foi Preso!</h2>
+                <p style="font-size: 1.1em; margin: 20px 0;">Você tentou enganar seus sócios sobre a indenização.</p>
+            </div>
+
+            <p style="color: #d32f2f; margin: 15px 0; font-weight: bold;">
+                Ayô descobriu a verdade e denunciou você para a polícia. Seu negócio desabou.
+            </p>
+
+            <p style="color: #666; margin: 15px 0;">
+                Ayô e Malik aparecem em primeiro plano (maiores), profissionais e bem-sucedidos. Abaixo deles, bem menor, você aparece - refletindo sua queda e exclusão do sucesso que poderiam ter compartilhado.
+            </p>
+
+            <!-- IMAGENS FINAIS - DESONESTO -->
+            <div class="final-characters dishonest" id="finalCharactersDishonest">
+                <!-- Será preenchido pelo JavaScript -->
+            </div>
+
+            <div class="input-group">
+                <label style="color: #333; font-weight: bold;">O que você diria da sua jornada?</label>
+                <div class="options-grid" id="finalOptionsDesonesto">
+                    <!-- Será preenchido pelo JavaScript -->
+                </div>
+            </div>
+
+            <div class="score-display" style="background: #d32f2f;">
+                <h2>Sua Pontuação Final</h2>
+                <p id="finalScoreDesonesto">250 pontos</p>
+            </div>
+
+            <div class="buttons">
+                <button class="btn-secondary" onclick="location.reload()">Jogar Novamente</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PARA VISUALIZAR IMAGEM DO PERSONAGEM -->
+    <div id="modalViewImage" class="modal-view-image">
+        <div class="modal-image-content">
+            <span class="close-modal" onclick="closeImageModal()">&times;</span>
+            <h3 id="characterNameModal"></h3>
+            <img id="characterImageModal" src="" alt="Personagem">
+            <button class="btn-primary" onclick="selectCharacterFromModal()">Escolher este Personagem</button>
+        </div>
+    </div>
+
+    <script>
+        // DADOS DO JOGO
+        const characters = [
+            { name: 'Personagem 1', image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---personagens/main/1.png' },
+            { name: 'Personagem 2', image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---personagens/main/2.png' },
+            { name: 'Personagem 3', image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---personagens/main/3.png' },
+            { name: 'Personagem 4', image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---personagens/main/4.png' },
+            { name: 'Personagem 5', image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---personagens/main/5.png' },
+            { name: 'Personagem 6', image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---personagens/main/6.png' },
+            { name: 'Personagem 7', image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---personagens/main/7.png' },
+            { name: 'Personagem 8', image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---personagens/main/8.png' },
+            { name: 'Personagem 9', image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---personagens/main/9.png' },
+            { name: 'Personagem 10', image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---personagens/main/10.png' },
+            { name: 'Personagem 11', image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---personagens/main/11.png' },
+            { name: 'Personagem 12', image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---personagens/main/12.png' },
+            { name: 'Personagem 13', image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---personagens/main/13.png' },
+            { name: 'Personagem 14', image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---personagens/main/14.png' },
+            { name: 'Personagem 15', image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---personagens/main/15.png' },
+            { name: 'Personagem 16', image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---personagens/main/16.png' },
+            { name: 'Personagem 17', image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---personagens/main/17.png' },
+            { name: 'Personagem 18', image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---personagens/main/18.png' },
+            { name: 'Personagem 19', image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---personagens/main/19.png' },
+            { name: 'Personagem 20', image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---personagens/main/20.png' }
+        ];
+
+        const mentors = [
+            {
+                name: 'Chris Gardner',
+                image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---mentores/main/Chris%20Gardner.png',
+                text: 'Eu sou Chris Gardner. Passei por tempos muito difíceis — cheguei a viver nas ruas com meu filho, lutando todos os dias para dar a ele uma vida melhor. Mesmo com tantas portas se fechando, nunca desisti dos meus sonhos. Com muita persistência e fé, conquistei meu espaço no mercado financeiro e me tornei um empreendedor de sucesso.'
+            },
+            {
+                name: 'Madam C.J. Walker',
+                image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---mentores/main/Madam%20C.J.%20Walker.png',
+                text: 'Comecei com muito pouco — lavando roupas e sonhando com um futuro melhor. Criei meus próprios produtos para cuidar dos cabelos de mulheres negras e, com coragem e trabalho, construí um império. Tornei-me a primeira mulher negra milionária dos Estados Unidos e usei minha voz para abrir caminhos para outras.'
+            },
+            {
+                name: 'Daymond John',
+                image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---mentores/main/Daymond%20John.png',
+                text: 'Comecei costurando bonés na cozinha da minha mãe, em Queens. A FUBU nasceu do desejo de criar algo feito por nós e para nós. Com determinação e criatividade, transformei uma pequena ideia em uma marca mundial e hoje invisto em quem também acredita em seus sonhos.'
+            },
+            {
+                name: 'Richelieu Dennis',
+                image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---mentores/main/Richelieu%20Dennis.png',
+                text: 'Herdei da minha avó a sabedoria e as receitas africanas de cuidado com a pele. Com isso, fundei a SheaMoisture, unindo tradição e propósito. Meu objetivo sempre foi mais que vender produtos — é fortalecer comunidades e criar oportunidades para quem, como eu, veio de baixo.'
+            },
+            {
+                name: 'Adriana Barbosa',
+                image: 'https://raw.githubusercontent.com/Araujotete/Raizes-2.0---mentores/main/Adriana%20Barbosa.png',
+                text: 'Eu queria mostrar a força e o talento do povo negro no Brasil. Assim nasceu a Feira Preta, um espaço de resistência e celebração. De um pequeno evento, cresceu para se tornar o maior movimento de empreendedorismo negro da América Latina — e eu sigo acreditando na potência da nossa cultura.'
+            }
+        ];
+
+        const businessTypes = [
+            { name: 'Beleza', emoji: '💄' },
+            { name: 'Tecnologia', emoji: '💻' },
+            { name: 'Arte', emoji: '🎨' },
+            { name: 'Educação', emoji: '📚' },
+            { name: 'Fotografia', emoji: '📷' },
+            { name: 'Dança', emoji: '💃' },
+            { name: 'Música', emoji: '🎵' },
+            { name: 'Mídia', emoji: '📺' },
+            { name: 'Escrita', emoji: '✍️' },
+            { name: 'Finanças', emoji: '💰' }
+        ];
+
+        const channels = [
+            'Jornal', 'Instagram', 'TikTok', 'Boca-a-boca', 'YouTube',
+            'Site na Web', 'WhatsApp', 'Panfletos', 'Grupos de Vendas'
+        ];
+
+        const employees = [
+            { name: 'Vendedor', desc: 'Especialista em vendas' },
+            { name: 'Marketing', desc: 'Criativo, conhecedor de tendências' },
+            { name: 'Design', desc: 'Designer criativo' },
+            { name: 'Assistente', desc: 'Organizado e eficiente' },
+            { name: 'Agente Publicitário', desc: 'Conectado, networking' },
+            { name: 'Escritor', desc: 'Produtor de conteúdo' }
+        ];
+
+        const growthOptions = [
+            'Fazer mais publicações nas redes sociais',
+            'Dar descontos para chamar mais clientes',
+            'Expandir equipe - contratar mais funcionários',
+            'Abrir filiais',
+            'Criar mais produtos'
+        ];
+
+        const ayoDepoisImage = 'https://raw.githubusercontent.com/Araujotete/Raizes2/main/Ay%C3%B4.png';
+        const malikDepoisImage = 'https://raw.githubusercontent.com/Araujotete/Raizes2/main/Malik.png';
+
+        let playerData = {
+            name: '',
+            character: '',
+            characterImage: '',
+            score: 0,
+            mentorsVisited: 0,
+            businesses: [],
+            businessName: '',
+            businessDesc: '',
+            channels: [],
+            employee: '',
+            clientPitch: '',
+            growth: [],
+            partnership: '',
+            ethics: '',
+            isHonest: true
+        };
+
+        let currentPhase = 0;
+        let videoEnded = false;
+
+        function initGame() {
+            renderCharacters();
+            renderMentors();
+            renderBusinessTypes();
+            renderChannels();
+            renderEmployees();
+            renderGrowthOptions();
+            renderPartnershipOptions();
+            renderEthicsOptions();
+            renderFinalOptions();
+        }
+
+        function renderCharacters() {
+            const grid = document.getElementById('characterGrid');
+            grid.innerHTML = characters.map((char) => 
+                `<div class="character-option">
+                    <img src="${char.image}" alt="${char.name}" onclick="openImageModal('${char.name}', '${char.image}')">
+                    <div class="character-name">${char.name}</div>
+                </div>`
+            ).join('');
+        }
+
+        function openImageModal(name, image) {
+            document.getElementById('characterNameModal').textContent = name;
+            document.getElementById('characterImageModal').src = image;
+            document.getElementById('modalViewImage').classList.add('active');
+            playerData.tempCharacter = name;
+            playerData.tempImage = image;
+        }
+
+        function closeImageModal() {
+            document.getElementById('modalViewImage').classList.remove('active');
+        }
+
+        function selectCharacterFromModal() {
+            playerData.character = playerData.tempCharacter;
+            playerData.characterImage = playerData.tempImage;
+            closeImageModal();
+            alert('Personagem ' + playerData.character + ' selecionado!');
+        }
+
+        function startGame() {
+            const name = document.getElementById('playerName').value;
+            if (!name || !playerData.character) {
+                alert('Por favor, preencha seu nome e escolha um personagem!');
+                return;
+            }
+            playerData.name = name;
+            playerData.score = 100;
+            showScreen('screen-abertura');
+        }
+
+        function renderMentors() {
+            const container = document.getElementById('mentorsContainer');
+            container.innerHTML = mentors.map((mentor, idx) => 
+                `<div class="mentor-card" onclick="visitMentor(${idx}, this)">
+                    <img src="${mentor.image}" alt="${mentor.name}" class="mentor-image">
+                    <div class="mentor-content">
+                        <strong>${mentor.name}</strong>
+                        <p>${mentor.text}</p>
+                        <small style="color: #999;">Clique para ouvir +4 pontos</small>
+                    </div>
+                </div>`
+            ).join('');
+        }
+
+        function visitMentor(idx, element) {
+            if (element.classList.contains('visited')) return;
+            element.classList.add('visited');
+            playerData.mentorsVisited++;
+            playerData.score += 4;
+            document.getElementById('mentorCount').textContent = playerData.mentorsVisited;
+            document.getElementById('mentorsSelected').style.display = 'block';
+            
+            if (playerData.mentorsVisited >= 3) {
+                document.getElementById('btnPhase2').disabled = false;
+            }
+        }
+
+        function renderBusinessTypes() {
+            const container = document.getElementById('businessTypes');
+            container.innerHTML = businessTypes.map((type, idx) => 
+                `<div class="checkbox-item">
+                    <input type="checkbox" data-business="${type.name}" onchange="updateBusinesses()"> 
+                    <span class="business-emoji">${type.emoji}</span> ${type.name}
+                </div>`
+            ).join('');
+        }
+
+        function updateBusinesses() {
+            const checks = document.querySelectorAll('#businessTypes input:checked');
+            if (checks.length > 3) {
+                checks[checks.length - 1].checked = false;
+                return;
+            }
+            playerData.businesses = Array.from(checks).map(c => c.getAttribute('data-business'));
+        }
+
+        function renderChannels() {
+            const container = document.getElementById('channels');
+            container.innerHTML = channels.map(channel => 
+                `<div class="checkbox-item">
+                    <input type="checkbox" onchange="updateChannels()"> ${channel}
+                </div>`
+            ).join('');
+        }
+
+        function updateChannels() {
+            const checks = document.querySelectorAll('#channels input:checked');
+            if (checks.length > 3) {
+                checks[checks.length - 1].checked = false;
+            }
+            playerData.channels = Array.from(checks).map(c => c.parentElement.textContent.trim());
+        }
+
+        function renderEmployees() {
+            const container = document.getElementById('employeeOptions');
+            container.innerHTML = employees.map(emp => 
+                `<button class="option-btn" onclick="selectEmployee('${emp.name}', this)">
+                    <strong>${emp.name}</strong><br>
+                    <small>${emp.desc}</small>
+                </button>`
+            ).join('');
+        }
+
+        function selectEmployee(emp, element) {
+            document.querySelectorAll('#employeeOptions .option-btn').forEach(e => e.classList.remove('selected'));
+            element.classList.add('selected');
+            playerData.employee = emp;
+        }
+
+        function renderGrowthOptions() {
+            const container = document.getElementById('growthOptions');
+            container.innerHTML = growthOptions.map(option => 
+                `<div class="checkbox-item">
+                    <input type="checkbox" onchange="updateGrowth()"> ${option}
+                </div>`
+            ).join('');
+        }
+
+        function updateGrowth() {
+            const checks = document.querySelectorAll('#growthOptions input:checked');
+            if (checks.length > 2) {
+                checks[checks.length - 1].checked = false;
+            }
+            playerData.growth = Array.from(checks).map(c => c.parentElement.textContent.trim());
+        }
+
+        function renderPartnershipOptions() {
+            const container = document.getElementById('partnershipOptions');
+            container.innerHTML = [
+                'Teste Prático - Cada um fica uma semana como gerente',
+                'Divisão no Mercado de Ações - 30% cada, 10% para investidores',
+                'Divisão com Caridade - 30% cada, 10% para caridade'
+            ].map(opt => 
+                `<button class="option-btn" onclick="selectPartnership('${opt}', this)">${opt}</button>`
+            ).join('');
+        }
+
+        function selectPartnership(opt, element) {
+            document.querySelectorAll('#partnershipOptions .option-btn').forEach(e => e.classList.remove('selected'));
+            element.classList.add('selected');
+            playerData.partnership = opt;
+        }
+
+        function renderEthicsOptions() {
+            const container = document.getElementById('ethicsOptions');
+            container.innerHTML = [
+                { text: 'R$30 mil para cada', value: 'honest' },
+                { text: 'R$60 mil no negócio, R$30 mil divididos', value: 'strategic' },
+                { text: 'Dizer que receberam R$60 mil, ficar com R$50 mil', value: 'dishonest' }
+            ].map(opt => 
+                `<button class="option-btn" onclick="selectEthics('${opt.value}', this)">${opt.text}</button>`
+            ).join('');
+        }
+
+        function selectEthics(opt, element) {
+            document.querySelectorAll('#ethicsOptions .option-btn').forEach(e => e.classList.remove('selected'));
+            element.classList.add('selected');
+            playerData.ethics = opt;
+            
+            if (opt === 'dishonest') {
+                playerData.isHonest = false;
+                playerData.score -= 80;
+            } else {
+                playerData.isHonest = true;
+                playerData.score += 20;
+            }
+        }
+
+        function renderFinalOptions() {
+            const optionsHonest = document.getElementById('finalOptions');
+            const optionsDesonesto = document.getElementById('finalOptionsDesonesto');
+            
+            const honestOpts = [
+                'Foi difícil, mas consegui',
+                'Os fins justificam os meios',
+                'Foi muito fácil'
+            ];
+
+            const dishonestOpts = [
+                'Foi difícil, mas consegui',
+                'Os fins justificam os meios',
+                'Foi muito fácil',
+                'Eu vou voltar, e quando isso acontecer, Malik e Ayô pagarão'
+            ];
+
+            optionsHonest.innerHTML = honestOpts.map(opt => 
+                `<button class="option-btn" onclick="endGame('${opt}', true)">${opt}</button>`
+            ).join('');
+
+            optionsDesonesto.innerHTML = dishonestOpts.map(opt => 
+                `<button class="option-btn" onclick="endGame('${opt}', false)">${opt}</button>`
+            ).join('');
+        }
+
+        function renderFinalCharacters() {
+            document.getElementById('finalCharactersHonesto').innerHTML = `
+                <img src="${ayoDepoisImage}" class="final-character-img ayo-malik" alt="Ayô">
+                <img src="${playerData.characterImage}" class="final-character-img ayo-malik" alt="${playerData.character}">
+                <img src="${malikDepoisImage}" class="final-character-img ayo-malik" alt="Malik">
+            `;
+
+            document.getElementById('finalCharactersDishonest').innerHTML = `
+                <div style="display: flex; gap: 20px; align-items: flex-start;">
+                    <img src="${ayoDepoisImage}" class="final-character-img ayo-malik" alt="Ayô">
+                    <img src="${malikDepoisImage}" class="final-character-img ayo-malik" alt="Malik">
+                </div>
+                <img src="${playerData.characterImage}" class="final-character-img player-character" alt="${playerData.character}">
+            `;
+        }
+
+        function setupVideoListener() {
+            const iframe = document.getElementById('policeVideo');
+            let checkCount = 0;
+            
+            const checkVideoProgress = setInterval(() => {
+                checkCount++;
+                if (checkCount > 120) {
+                    clearInterval(checkVideoProgress);
+                    document.getElementById('continueAfterVideo').style.display = 'block';
+                }
+            }, 500);
+        }
+
+        function goToPhase(phase) {
+            let screenId = '';
+            currentPhase = phase;
+            
+            if (phase === 1) {
+                screenId = 'screen-fase1';
+                playerData.score += 100;
+            } else if (phase === 2) {
+                screenId = 'screen-fase2';
+                playerData.score += 100;
+            } else if (phase === 3) {
+                screenId = 'screen-fase3';
+                playerData.score += 100;
+            } else if (phase === 4) {
+                screenId = 'screen-fase4';
+                playerData.score += 100;
+            } else if (phase === 5) {
+                screenId = 'screen-fase5';
+                playerData.score += 100;
+                document.getElementById('playerImagePhase5a').src = playerData.characterImage;
+            } else if (phase === 6) {
+                screenId = 'screen-fase6';
+                playerData.score += 100;
+            } else if (phase === 7) {
+                screenId = 'screen-fase7';
+                playerData.score += 100;
+            } else if (phase === 8) {
+                screenId = 'screen-fase8';
+                playerData.score += 100;
+                document.getElementById('playerImagePhase8a').src = playerData.characterImage;
+                document.getElementById('playerImagePhase8b').src = playerData.characterImage;
+            } else if (phase === 9) {
+                screenId = 'screen-fase9';
+            } else if (phase === 10) {
+                if (!playerData.isHonest) {
+                    screenId = 'screen-fase10-desonesto';
+                    showScreen(screenId);
+                    setupVideoListener();
+                    return;
+                }
+                
+                renderFinalCharacters();
+                screenId = 'screen-fase10-honesto';
+                document.getElementById('finalScore').textContent = playerData.score + ' pontos';
+            }
+            
+            showScreen(screenId);
+        }
+
+        function showFinalScreen() {
+            document.getElementById('policeVideoContainer').style.display = 'none';
+            document.getElementById('arrestMessageContainer').style.display = 'block';
+            document.getElementById('arrestMessage').style.display = 'block';
+            document.getElementById('consequenceMessage').style.display = 'block';
+            document.getElementById('finalCharactersDishonest').style.display = 'flex';
+            document.getElementById('finalOptionsContainer').style.display = 'block';
+            document.getElementById('finalScoreContainer').style.display = 'block';
+            document.getElementById('playAgainContainer').style.display = 'flex';
+            
+            if (!document.getElementById('finalCharactersDishonest').innerHTML) {
+                renderFinalCharacters();
+            }
+            
+            playerData.score = Math.min(playerData.score + 20, 400);
+            document.getElementById('finalScoreDesonesto').textContent = playerData.score + ' pontos';
+            
+            window.scrollTo(0, 0);
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function endGame(answer, isHonest) {
+            alert(`Fim de Jogo!\n\nSua resposta: "${answer}"\n\nPontuação Final: ${playerData.score} pontos\n\nObrigado por jogar!`);
+            location.reload();
+        }
+
+        function validatePhase1() {
+            if (playerData.mentorsVisited < 3) {
+                alert('Você precisa visitar pelo menos 3 mentores antes de continuar!');
+                return;
+            }
+            goToPhase(2);
+        }
+
+        function validatePhase2() {
+            const businessName = document.getElementById('businessName').value.trim();
+            if (playerData.businesses.length < 1) {
+                alert('Você precisa escolher pelo menos 1 ramo de negócio!');
+                return;
+            }
+            if (!businessName) {
+                alert('Você precisa dar um nome ao seu empreendimento!');
+                return;
+            }
+            playerData.businessName = businessName;
+            goToPhase(3);
+        }
+
+        function validatePhase3() {
+            const businessDesc = document.getElementById('businessDesc').value.trim();
+            if (!businessDesc) {
+                alert('Você precisa descrever seu negócio!');
+                return;
+            }
+            if (playerData.channels.length < 1) {
+                alert('Você precisa escolher pelo menos 1 canal de divulgação!');
+                return;
+            }
+            playerData.businessDesc = businessDesc;
+            goToPhase(4);
+        }
+
+        function validatePhase4() {
+            if (!playerData.employee) {
+                alert('Você precisa escolher um funcionário para contratar!');
+                return;
+            }
+            goToPhase(5);
+        }
+
+        function validatePhase5() {
+            const clientPitch = document.getElementById('clientPitch').value.trim();
+            if (!clientPitch) {
+                alert('Você precisa criar um pitch para seu cliente!');
+                return;
+            }
+            playerData.clientPitch = clientPitch;
+            goToPhase(6);
+        }
+
+        function validatePhase6() {
+            if (playerData.growth.length < 1) {
+                alert('Você precisa escolher pelo menos 1 estratégia de crescimento!');
+                return;
+            }
+            goToPhase(7);
+        }
+
+        function validatePhase7() {
+            if (!playerData.partnership) {
+                alert('Você precisa escolher uma solução para o conflito entre sócios!');
+                return;
+            }
+            goToPhase(8);
+        }
+
+        function validatePhase9() {
+            if (!playerData.ethics) {
+                alert('Você precisa fazer uma escolha sobre como dividir o dinheiro!');
+                return;
+            }
+            goToPhase(10);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const desc = document.getElementById('businessDesc');
+            if (desc) {
+                desc.addEventListener('input', () => {
+                    document.getElementById('charCount').textContent = desc.value.length + '/150';
+                });
+            }
+            initGame();
+        });
+    </script>
+</body>
+</html>
